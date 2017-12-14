@@ -10,7 +10,7 @@ def type_calc(x):
         except ValueError:
             return 'string'
 
-def string_to_list_type(string):
+def string_to_list_type(string): #Count number of parenthesis
     list = []
     i = 0
     while i < len(string):
