@@ -28,10 +28,10 @@ def string_to_list_type(string): #Count number of parenthesis
             i+=1
     return list
 
-def calculation(poly_list): #Attention, ce paragraphe est à finir (check '((5+6)/(6*2-12))'). Conseil : utilise plusieurs variables de return, dont une validant que le calcul fonctionne
+def calculation(poly_list):
     calc = 0
     for i in range(len(poly_list)):
-        print('gg',poly_list[i])
+        print('npolynom',poly_list[i])
         if i-1 > 0:
             if poly_list[i-1][0] == '*' and poly_list[i][1] == 'integer':
                 calc = calc * int(poly_list[i][0])
@@ -42,7 +42,7 @@ def calculation(poly_list): #Attention, ce paragraphe est à finir (check '((5+6
                     return "Division by zero not allowed"
         elif poly_list[i][1] == 'integer':
             calc = calc + int(poly_list[i][0])
-    print("c",calc)
+    print("ncalcu",calc)
     return calc
             
 
@@ -50,12 +50,15 @@ def evaluate(polynom_list):
     temp=[]
     for i in range(len(polynom_list)):
         temp.append(polynom_list[i][0])
-    print(temp)
+    print('ntemporaire',temp)
     temp = ''.join(temp)
+    print('ntemporore',temp)
     if re.search(r"/\)*\(*0",temp) is not None:
+        print("00000000000000000")
         return 'Division by zero not allowed'
-    print('li',polynom_list)
+    print('nlist',polynom_list)
     if type(polynom_list) == type(''):
+        print("RECOGNISED")
         return polynom_list
     if polynom_list == None:
         return
@@ -79,12 +82,16 @@ def evaluate(polynom_list):
             list2.append(polynom_list[i])
         for i in range(pos_p+1,len(polynom_list)):
             list3.append(polynom_list[i])
-        ret = list1 + (string_to_list_type(str(evaluate(list2)))) + list3
-        print('ret',ret)
-        return (evaluate(ret))
+        temp = str(evaluate(list2))
+        if temp == 'Division by zero not allowed':
+            return temp
+        else:
+            ret = list1 + (string_to_list_type(temp)) + list3
+            print('nret',ret)
+            return (evaluate(ret))
 
     else:
-        print('v')
+        print('noperator')
         if ('+','operator') in polynom_list: #RAJOUTE UN TRUC POUR PRENDRE EN COMPTE LES PARENTHESES EN PREMIER
             list1 = []
             list2 = []
