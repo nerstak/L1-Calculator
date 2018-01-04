@@ -3,7 +3,6 @@
 Choses à faire :
 	-URGENCE : identifier type d'entrée pour répartir sur les différentes fonctions
 	-Vérifier que l'utilisateur n'a pas mis de la merde : - parenthèses
-							       - division par zéro (try catch)
 	-Concaténation de mots
 	-Variables
 	-Booléan (ça va être chiant)
@@ -15,3 +14,5 @@ Optionnels :
 	
 	
 	
+Fait :
+	-Division par zéro
