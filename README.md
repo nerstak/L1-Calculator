@@ -1,8 +1,7 @@
 /!\ CODE INSTABLE
 
 Choses à faire :
-	-URGENCE : identifier type d'entrée pour répartir sur les différentes fonctions
-	-Concaténation de mots
+	-URGENCE : identifier type d'entrée pour répartir sur les différentes fonctions [Fait d'une façon différente]
 	-Variables
 	-Boolean
 
@@ -16,3 +15,4 @@ Optionnels :
 Fait :
 	-Division par zéro
 	-Parenthèses
+	-Concaténation de string
