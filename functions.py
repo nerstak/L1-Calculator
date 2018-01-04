@@ -11,7 +11,7 @@ def type_calc(x):
         except ValueError:
             return 'string'
 
-def string_to_list_type(string): #Count number of parenthesis
+def string_to_list_type(string):
     list = []
     i = 0
     while i < len(string):
@@ -21,12 +21,22 @@ def string_to_list_type(string): #Count number of parenthesis
                 nb = nb + string[i]
                 i+=1
             list.append((nb,type_calc(i)))
+        elif string[i] == '"':
+            nb = ''
+            i+=1
+            while i < len(string) and string[i] != '"':
+                nb = nb +string[i]
+                i+=1
+            if string.count('"') % 2 != 0:
+                return None, "Error: missing quote"
+            list.append((nb,"string"))
+            i+=1        
         elif string[i] != " ":
             list.append((string[i],type_calc(string[i])))
             i+=1
         else:
             i+=1
-    return list
+    return list, None
 
 def calculation(poly_list):
     calc = 0
@@ -50,6 +60,8 @@ def evaluate(polynom_list):
     temp=[]
     for i in range(len(polynom_list)):
         temp.append(polynom_list[i][0])
+        if polynom_list[i][1] == "string":
+            return concatenation(polynom_list)
     print('ntemporaire',temp)
     temp = ''.join(temp)
     print('ntemporore',temp)
@@ -118,11 +130,22 @@ def evaluate(polynom_list):
         else:
             return (calculation(polynom_list))
 
-# def identify_string(string_in_list):
-#     i = nbr_s = 0
-#     while i<len(string_in_list):
-#         if string_in_list[i][1] == 'string':
-#             nbr_s+=1
-#         i+=1
-#     if nbr_s==len(string_in_list):
-#         return True
+def concatenation(string_list):
+    temp = ""
+    cpt = 0
+    i = 0
+    while i < len(string_list):
+        if ("-" or "/" or "*" or "integer") in string_list[i]:
+            return "Error: Wrong syntax"
+        if string_list[i][1] == "parenthesis":
+            del string_list[i]
+        else:
+            i+=1
+    for i in range(len(string_list)):
+        if i % 2 == 0 and string_list[i][1] == 'string':
+            temp = temp + string_list[i][0]
+        elif i % 2 == 1 and string_list[i][1] == 'operator' and i != len(string_list)-1:
+            None
+        else:
+            return "Error: Wrong syntax"
+    return temp
