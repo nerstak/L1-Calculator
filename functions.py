@@ -53,15 +53,22 @@ def evaluate(polynom_list):
     print('ntemporaire',temp)
     temp = ''.join(temp)
     print('ntemporore',temp)
-    if re.search(r"/\)*\(*0",temp) is not None:
-        print("00000000000000000")
+    if re.search(r"/\)*\(*0",temp) is not None: #Regular expression
         return 'Division by zero not allowed'
     print('nlist',polynom_list)
     if type(polynom_list) == type(''):
-        print("RECOGNISED")
         return polynom_list
+    i = cpt =0
+    while cpt >= 0 and i < len(temp):
+        if temp[i] == '(':
+            cpt +=1
+        elif temp[i] == ')':
+            cpt -= 1
+        i += 1
+    if cpt < 0:
+        return "Input incorrect (parenthesis)"  
     if polynom_list == None:
-        return
+        return None
     elif ('(','parenthesis') in polynom_list:
         nbr_p = i = 0
         pos_p = -1

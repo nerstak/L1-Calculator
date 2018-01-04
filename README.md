@@ -2,10 +2,9 @@
 
 Choses à faire :
 	-URGENCE : identifier type d'entrée pour répartir sur les différentes fonctions
-	-Vérifier que l'utilisateur n'a pas mis de la merde : - parenthèses
 	-Concaténation de mots
 	-Variables
-	-Booléan (ça va être chiant)
+	-Boolean
 
 Optionnels :
 	-GUI
@@ -16,3 +15,4 @@ Optionnels :
 	
 Fait :
 	-Division par zéro
+	-Parenthèses
