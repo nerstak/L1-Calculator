@@ -77,8 +77,8 @@ def evaluate(polynom_list):
         elif temp[i] == ')':
             cpt -= 1
         i += 1
-    if cpt < 0:
-        return "Input incorrect (parenthesis)"  
+        if cpt < 0:
+            return "Input incorrect (parenthesis)"  
     if polynom_list == None:
         return None
     elif ('(','parenthesis') in polynom_list:

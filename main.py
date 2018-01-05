@@ -1,5 +1,5 @@
 #Importation
-import functions
+import functions, functions_alt
 
 exit = False
 while exit == False:
@@ -7,12 +7,12 @@ while exit == False:
     if entry.lower() == 'exit': #Checking if the user want to stop
         exit = True
     else:
-        list_entry, Error = functions.string_to_list_type(entry) #Transformation to give a regular form
-        if Error is not None:
-            print(Error)
+        list_entry = functions_alt.string_to_list_type(entry) #Transformation to give a regular form
+        if list_entry == "Error: missing quote":
+            print(list_entry)
         else:
             print(list_entry)
-            Result = functions.evaluate(list_entry)
+            Result = functions_alt.evaluate(list_entry)
             print(Result)
     #Important to check if list_entry won't be False
 
