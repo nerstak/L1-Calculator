@@ -11,7 +11,7 @@ while exit == False:
         if list_entry == "Error: missing quote":
             print(list_entry)
         else:
-            print(list_entry)
+            print("Entry",list_entry)
             Result = functions_alt.evaluate(list_entry)
             print(Result)
     #Important to check if list_entry won't be False

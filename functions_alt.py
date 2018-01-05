@@ -1,5 +1,5 @@
 def type_calc(x):
-    if x == "+" or x == "*" or x == "-" or x == "/":
+    if x in ["/","-","+","*","==","<",">","<>","<=",">=","not","and","or"] :
         return 'operator'
     elif x == '(' or x == ')':
         return 'parenthesis'
@@ -21,26 +21,34 @@ def string_to_list_type(string):
                 i+=1
             list.append((nb,type_calc(i)))
         elif string[i] == '"':
+            if string.count('"') % 2 != 0:
+                return "Error: missing quote"
             nb = ''
             i+=1
             while i < len(string) and string[i] != '"':
+                print("s",string[i])
                 nb = nb +string[i]
                 i+=1
-            if string.count('"') % 2 != 0:
-                return "Error: missing quote"
-            list.append((nb,"string"))
-            i+=1        
-        elif string[i] != " ":
-            list.append((string[i],type_calc(string[i])))
             i+=1
+            list.append((nb,"string"))
+        elif string[i] != " ":
+            if (type_calc(string[i]) in ["operator","parenthesis"]) or string[i]== " ":
+                list.append((string[i],type_calc(string[i])))
+                i+=1
+            else:
+                nb = ''
+                while i < len(string) and (string[i] != " " and type_calc(string[i]) != "operator"):
+                    nb = nb + string [i]
+                    i+=1
+                list.append((nb,type_calc(nb)))
         else:
             i+=1
     return list
 
-def evaluate(polynom):
+def evaluate(polynom,str_warn=0):
     for i in polynom:
         if i[1] == "string":
-            return concatenation(polynom)
+            str_warn = 1
     if ('(','parenthesis') in polynom:
         i = cpt =0
         while cpt >= 0 and i < len(polynom):
@@ -90,16 +98,22 @@ def evaluate(polynom):
             list1.append(polynom[i])
         for i in range(polynom.index(('+','operator'))+1,len(polynom)):
             list2.append(polynom[i])
-        return evaluate(list1) + evaluate(list2)
-    elif ('-','operator') in polynom:
-        list1 = []
-        list2 = []
-        for i in range(polynom.index(('-','operator'))):
-            list1.append(polynom[i])
-        for i in range(polynom.index(('-','operator'))+1,len(polynom)):
-            list2.append(polynom[i])
-        return evaluate(list1) - evaluate(list2)
-    elif (('/','operator') in polynom) or (('*','operator') in polynom):
+        if str_warn == 1:
+            temp1 = str(evaluate(list1,1))
+            temp2 = str(evaluate(list2,1))
+        else:
+            temp1 = evaluate(list1)
+            temp2 = evaluate(list2)
+        return temp1 + temp2
+    elif ('-','operator') in polynom and str_warn == 0:
+            list1 = []
+            list2 = []
+            for i in range(polynom.index(('-','operator'))):
+                list1.append(polynom[i])
+            for i in range(polynom.index(('-','operator'))+1,len(polynom)):
+                list2.append(polynom[i])
+            return evaluate(list1) - evaluate(list2)
+    elif (('/','operator') in polynom) or (('*','operator') in polynom) and str_warn == 0:
         try:
             index_div = polynom.index(('/','operator'))
         except ValueError:
@@ -138,8 +152,11 @@ def evaluate(polynom):
     elif polynom == []:
         return 0
     else:
-        print(polynom)
-        return int(polynom[0][0])
+        print("poly",polynom)
+        if polynom[0][1]=='string':
+            return polynom[0][0]
+        elif polynom[0][1]=='integer':
+            return int(polynom[0][0])
 
 def concatenation(string_list):
     temp = ""
@@ -153,8 +170,9 @@ def concatenation(string_list):
         else:
             i+=1
     for i in range(len(string_list)):
-        if i % 2 == 0 and string_list[i][1] == 'string':
-            temp = temp + string_list[i][0]
+        if i % 2 == 0:
+            if string_list[i][1] == 'string':
+                temp = temp + string_list[i][0]
         elif i % 2 == 1 and string_list[i][1] == 'operator' and i != len(string_list)-1:
             None
         else:
