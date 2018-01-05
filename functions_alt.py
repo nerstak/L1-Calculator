@@ -157,24 +157,3 @@ def evaluate(polynom,str_warn=0):
             return polynom[0][0]
         elif polynom[0][1]=='integer':
             return int(polynom[0][0])
-
-def concatenation(string_list):
-    temp = ""
-    cpt = 0
-    i = 0
-    while i < len(string_list):
-        if string_list[i][0] == "-" or string_list[i][0] == "/" or string_list[i][0] == "*" or string_list[i][1] == "integer":
-            return "Error: Wrong syntax"
-        if string_list[i][1] == "parenthesis":
-            del string_list[i]
-        else:
-            i+=1
-    for i in range(len(string_list)):
-        if i % 2 == 0:
-            if string_list[i][1] == 'string':
-                temp = temp + string_list[i][0]
-        elif i % 2 == 1 and string_list[i][1] == 'operator' and i != len(string_list)-1:
-            None
-        else:
-            return "Error: Wrong syntax"
-    return temp
