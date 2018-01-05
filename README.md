@@ -13,6 +13,7 @@ Optionnels :
 	
 	
 Fait :
+	-Promoting to String Type
 	-Division par zéro
 	-Parenthèses
 	-Concaténation de string
