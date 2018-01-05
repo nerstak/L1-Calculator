@@ -1,3 +1,5 @@
+#USELESS FILE: PLEASE DO NOT WRITE INSIDE
+
 import re
 def type_calc(x):
     if x == "+" or x == "*" or x == "-" or x == "/":
