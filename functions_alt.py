@@ -3,6 +3,8 @@ def type_calc(x):
         return 'operator'
     elif x == '(' or x == ')':
         return 'parenthesis'
+    elif x in ["true","false"]:
+        return 'boolean'
     else:
         try:
             int(x)
@@ -33,13 +35,28 @@ def string_to_list_type(string):
             list.append((nb,"string"))
         elif string[i] != " ":
             if (type_calc(string[i]) in ["operator","parenthesis"]) or string[i]== " ":
-                list.append((string[i],type_calc(string[i])))
-                i+=1
-            else:
-                nb = ''
-                while i < len(string) and (string[i] != " " and type_calc(string[i]) != "operator"):
-                    nb = nb + string [i]
+                if string[i] == "<" and string[i+1] in ["=",">"]:
+                    list.append((string[i]+string[i+1],"operator"))
+                    i+=2
+                elif string[i] == ">" and string[i+1] == "=":
+                    list.append((string[i]+string[i+1],"operator"))
+                    i+=2
+                else:  
+                    list.append((string[i],type_calc(string[i])))
                     i+=1
+            elif string[i] == '=':
+                if string[i+1] == '=':
+                    list.append(("==","operator"))
+                    i+=2
+            else:
+                continu = True
+                nb = ''
+                while i < len(string) and (string[i] != " " and type_calc(string[i]) != "operator") and continu == True:
+                    nb = nb + string[i]
+                    i+=1
+                    print('oui',nb)
+                    if nb in ['not','or','and'] and type_calc(string[i]) not in ("integer","string"):
+                        continu = False
                 list.append((nb,type_calc(nb)))
         else:
             i+=1
@@ -90,6 +107,109 @@ def evaluate(polynom,str_warn=0):
             ret = list1 + temp + list3
             print('nret',ret)
             return (evaluate(ret))
+    elif ("==","operator") in polynom:
+        list1 = []
+        list2 = []
+        for i in range(polynom.index(('==','operator'))):
+            list1.append(polynom[i])
+        for i in range(polynom.index(('==','operator'))+1,len(polynom)):
+            list2.append(polynom[i])
+        if str_warn == 1:
+            temp1 = str(evaluate(list1,1))
+            temp2 = str(evaluate(list2,1))
+        else:
+            temp1 = evaluate(list1)
+            temp2 = evaluate(list2)
+        if temp1 == temp2:
+            return 'true'
+        else:
+            return 'false'
+    elif ("<=","operator") in polynom:
+        list1 = []
+        list2 = []
+        for i in range(polynom.index(('<=','operator'))):
+            list1.append(polynom[i])
+        for i in range(polynom.index(('<=','operator'))+1,len(polynom)):
+            list2.append(polynom[i])
+        if str_warn == 1:
+            temp1 = str(evaluate(list1,1))
+            temp2 = str(evaluate(list2,1))
+        else:
+            temp1 = evaluate(list1)
+            temp2 = evaluate(list2)
+        if temp1 <= temp2:
+            return 'true'
+        else:
+            return 'false'
+    elif (">=","operator") in polynom:
+        list1 = []
+        list2 = []
+        for i in range(polynom.index(('>=','operator'))):
+            list1.append(polynom[i])
+        for i in range(polynom.index(('>=','operator'))+1,len(polynom)):
+            list2.append(polynom[i])
+        if str_warn == 1:
+            temp1 = str(evaluate(list1,1))
+            temp2 = str(evaluate(list2,1))
+        else:
+            temp1 = evaluate(list1)
+            temp2 = evaluate(list2)
+        if temp1 >= temp2:
+            return 'true'
+        else:
+            return 'false'
+    elif ("<>","operator") in polynom:
+        list1 = []
+        list2 = []
+        for i in range(polynom.index(('<>','operator'))):
+            list1.append(polynom[i])
+        for i in range(polynom.index(('<>','operator'))+1,len(polynom)):
+            list2.append(polynom[i])
+        if str_warn == 1:
+            temp1 = str(evaluate(list1,1))
+            temp2 = str(evaluate(list2,1))
+        else:
+            temp1 = evaluate(list1)
+            temp2 = evaluate(list2)
+        if temp1 != temp2:
+            return 'true'
+        else:
+            return 'false'
+    elif ("<","operator") in polynom:
+        list1 = []
+        list2 = []
+        for i in range(polynom.index(('<','operator'))):
+            list1.append(polynom[i])
+        for i in range(polynom.index(('<','operator'))+1,len(polynom)):
+            list2.append(polynom[i])
+        if str_warn == 1:
+            temp1 = str(evaluate(list1,1))
+            temp2 = str(evaluate(list2,1))
+        else:
+            temp1 = evaluate(list1)
+            temp2 = evaluate(list2)
+        if temp1 < temp2:
+            return 'true'
+        else:
+            return 'false'
+    elif (">","operator") in polynom:
+        list1 = []
+        list2 = []
+        for i in range(polynom.index(('>','operator'))):
+            list1.append(polynom[i])
+        for i in range(polynom.index(('>','operator'))+1,len(polynom)):
+            list2.append(polynom[i])
+        if str_warn == 1:
+            temp1 = str(evaluate(list1,1))
+            temp2 = str(evaluate(list2,1))
+        else:
+            temp1 = evaluate(list1)
+            temp2 = evaluate(list2)
+        if temp1 > temp2:
+            return 'true'
+        else:
+            return 'false'
+    
     
     elif ('+','operator') in polynom:
         list1 = []
@@ -153,7 +273,10 @@ def evaluate(polynom,str_warn=0):
         return 0
     else:
         print("poly",polynom)
-        if polynom[0][1]=='string':
-            return polynom[0][0]
-        elif polynom[0][1]=='integer':
-            return int(polynom[0][0])
+        if len(polynom) <= 1:
+            if polynom[0][1] in ["string","boolean"]:
+                return polynom[0][0]
+            elif polynom[0][1]=='integer':
+                return int(polynom[0][0])
+        else:
+            return "Error: Wrong syntax"
