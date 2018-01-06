@@ -1,9 +1,8 @@
 /!\ CODE INSTABLE
 
 Choses à faire :
-	-URGENCE : identifier type d'entrée pour répartir sur les différentes fonctions [Fait d'une façon différente]
+	-Rapports d'erreurs
 	-Variables
-	-Boolean
 
 Optionnels :
 	-GUI
@@ -13,6 +12,7 @@ Optionnels :
 	
 	
 Fait :
+	-Boolean
 	-Promoting to String Type
 	-Division par zéro
 	-Parenthèses

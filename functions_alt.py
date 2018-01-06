@@ -51,10 +51,9 @@ def string_to_list_type(string):
             else:
                 continu = True
                 nb = ''
-                while i < len(string) and (string[i] != " " and type_calc(string[i]) != "operator") and continu == True:
+                while i < len(string) and (string[i] not in [" ",'"','(',')'] and type_calc(string[i]) != "operator") and continu == True:
                     nb = nb + string[i]
                     i+=1
-                    print('oui',nb)
                     if nb in ['not','or','and'] and type_calc(string[i]) not in ("integer","string"):
                         continu = False
                 list.append((nb,type_calc(nb)))
@@ -66,6 +65,9 @@ def evaluate(polynom,str_warn=0):
     for i in polynom:
         if i[1] == "string":
             str_warn = 1
+    list1 = []
+    list2 = []
+    list3 = []
     if ('(','parenthesis') in polynom:
         i = cpt =0
         while cpt >= 0 and i < len(polynom):
@@ -88,9 +90,6 @@ def evaluate(polynom,str_warn=0):
             elif polynom[i][0] == ')' and nbr_p != 1:
                 nbr_p -= 1
             i += 1
-        list1 = []
-        list2 = []
-        list3 = []
         for i in range(polynom.index(('(','parenthesis'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('(','parenthesis'))+1,pos_p):
@@ -107,9 +106,52 @@ def evaluate(polynom,str_warn=0):
             ret = list1 + temp + list3
             print('nret',ret)
             return (evaluate(ret))
+    elif ('or','operator') in polynom:
+        temp = len(polynom)
+        for i in range(polynom.index(('or','operator'))):
+            list1.append(polynom[i])
+        for i in range(polynom.index(('or','operator'))+1,temp):
+            list2.append(polynom[i])
+        temp1 = evaluate(list1)
+        temp2 = evaluate(list2)
+        if temp1 == 'true' or temp2 == 'true' :
+            return "true"
+        else:
+            return "false"
+    elif ('and','operator') in polynom:
+        temp = len(polynom)
+        operator_pos = -1
+        t = polynom.index(('and','operator'))+1
+        while t < len(polynom) and operator_pos==-1:
+            if polynom[t][0] in ["or"]:
+                temp = t
+            t+=1
+        for i in range(polynom.index(('and','operator'))):
+            list1.append(polynom[i])
+        for i in range(polynom.index(('and','operator'))+1,temp):
+            list2.append(polynom[i])
+        temp1 = evaluate(list1)
+        temp2 = evaluate(list2)
+        if temp1 == temp2 == "true" :
+            return "true"
+        else:
+            return "false"
+    elif ('not','operator') in polynom:
+        temp = len(polynom)
+        operator_pos = -1
+        t = polynom.index(('not','operator'))+1
+        while t < len(polynom) and operator_pos==-1:
+            if polynom[t][0] in ["and","or"]:
+                temp = t
+            t+=1
+        for i in range(polynom.index(('not','operator'))+1,temp):
+            list1.append(polynom[i])
+        temp1 = evaluate(list1)
+        if temp1 == "false" or 0:
+            return "true"
+        else:
+            return "false"
     elif ("==","operator") in polynom:
-        list1 = []
-        list2 = []
         for i in range(polynom.index(('==','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('==','operator'))+1,len(polynom)):
@@ -125,8 +167,6 @@ def evaluate(polynom,str_warn=0):
         else:
             return 'false'
     elif ("<=","operator") in polynom:
-        list1 = []
-        list2 = []
         for i in range(polynom.index(('<=','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('<=','operator'))+1,len(polynom)):
@@ -142,8 +182,6 @@ def evaluate(polynom,str_warn=0):
         else:
             return 'false'
     elif (">=","operator") in polynom:
-        list1 = []
-        list2 = []
         for i in range(polynom.index(('>=','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('>=','operator'))+1,len(polynom)):
@@ -159,8 +197,6 @@ def evaluate(polynom,str_warn=0):
         else:
             return 'false'
     elif ("<>","operator") in polynom:
-        list1 = []
-        list2 = []
         for i in range(polynom.index(('<>','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('<>','operator'))+1,len(polynom)):
@@ -176,8 +212,6 @@ def evaluate(polynom,str_warn=0):
         else:
             return 'false'
     elif ("<","operator") in polynom:
-        list1 = []
-        list2 = []
         for i in range(polynom.index(('<','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('<','operator'))+1,len(polynom)):
@@ -193,8 +227,6 @@ def evaluate(polynom,str_warn=0):
         else:
             return 'false'
     elif (">","operator") in polynom:
-        list1 = []
-        list2 = []
         for i in range(polynom.index(('>','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('>','operator'))+1,len(polynom)):
@@ -209,11 +241,7 @@ def evaluate(polynom,str_warn=0):
             return 'true'
         else:
             return 'false'
-    
-    
     elif ('+','operator') in polynom:
-        list1 = []
-        list2 = []
         for i in range(polynom.index(('+','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('+','operator'))+1,len(polynom)):
@@ -226,8 +254,6 @@ def evaluate(polynom,str_warn=0):
             temp2 = evaluate(list2)
         return temp1 + temp2
     elif ('-','operator') in polynom and str_warn == 0:
-            list1 = []
-            list2 = []
             for i in range(polynom.index(('-','operator'))):
                 list1.append(polynom[i])
             for i in range(polynom.index(('-','operator'))+1,len(polynom)):
@@ -242,8 +268,6 @@ def evaluate(polynom,str_warn=0):
             index_mult = polynom.index(('*','operator'))
         except ValueError:
             index_mult = 999
-        list1 = []
-        list2 = []
         if index_div > index_mult:
             for i in range(index_mult):
                 list1.append(polynom[i])
