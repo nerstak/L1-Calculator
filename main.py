@@ -12,7 +12,10 @@ while exit == False:
             print(list_entry)
         else:
             print("Entry",list_entry)
-            Result = functions_alt.evaluate(list_entry)
+            print(functions_alt.evaluate(list_entry))
+            Result, *Error = functions_alt.evaluate(list_entry)
+            if Error[0] is not None:
+                print(Error[0])    
             print(Result)
     #Important to check if list_entry won't be False
 

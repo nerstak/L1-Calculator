@@ -1,7 +1,7 @@
 /!\ CODE INSTABLE
 
 Choses à faire :
-	-Rapports d'erreurs
+	-Erreurs spécifiques
 	-Variables
 
 Optionnels :
@@ -12,6 +12,7 @@ Optionnels :
 	
 	
 Fait :
+	-Implémentation du système d'erreurs
 	-Boolean
 	-Promoting to String Type
 	-Division par zéro

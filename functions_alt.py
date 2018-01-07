@@ -18,7 +18,7 @@ def string_to_list_type(string):
     while i < len(string):
         if 'integer' == type_calc(string[i]):
             nb = ''
-            while i < len(string) and 'integer' == type_calc(string[i]):
+            while i < len(string) and ('integer' == type_calc(string[i]) or string[i]=='.'):
                 nb = nb + string[i]
                 i+=1
             list.append((nb,type_calc(i)))
@@ -54,12 +54,20 @@ def string_to_list_type(string):
                 while i < len(string) and (string[i] not in [" ",'"','(',')'] and type_calc(string[i]) != "operator") and continu == True:
                     nb = nb + string[i]
                     i+=1
-                    if nb in ['not','or','and'] and type_calc(string[i]) not in ("integer","string"):
+                    if i>= len(string) or nb in ['not','or','and'] and type_calc(string[i]) not in ("integer","string"):
                         continu = False
                 list.append((nb,type_calc(nb)))
         else:
             i+=1
     return list
+
+def check_errors(array1,array2,result):
+    if array1[1] == array2[1] == None:
+        return (result,None)
+    elif array1[1] != None:    
+        return (None,array1[1])
+    else:
+        return (None,array2[1])
 
 def evaluate(polynom,str_warn=0):
     for i in polynom:
@@ -68,7 +76,7 @@ def evaluate(polynom,str_warn=0):
     list1 = []
     list2 = []
     list3 = []
-    if ('(','parenthesis') in polynom:
+    if ('(','parenthesis') in polynom or (')','parenthesis') in polynom:
         i = cpt =0
         while cpt >= 0 and i < len(polynom):
             if polynom[i][0] == '(':
@@ -77,9 +85,9 @@ def evaluate(polynom,str_warn=0):
                 cpt -= 1
             i += 1
             if cpt < 0:
-                return "Error: wrong syntax (parenthesis)"
+                return (None,"Error: wrong syntax (missing parenthesis '(')")
         if cpt !=0:
-            return "Error: wrong syntax (parenthesis)"
+            return (None,"Error: wrong syntax (missing parenthesis ')')")
         nbr_p = i = 0
         pos_p = -1
         while i < len(polynom) and pos_p == -1:
@@ -96,12 +104,13 @@ def evaluate(polynom,str_warn=0):
             list2.append(polynom[i])
         for i in range(pos_p+1,len(polynom)):
             list3.append(polynom[i])
-        temp = str(evaluate(list2))
+        print('list2',list2)
+        temp = evaluate(list2)
         print('ntemp',temp)
-        if temp == "Error: Division by zero":
-            return temp
+        if temp[1] is not None:
+            return (None,temp[1])
         else:
-            temp = (string_to_list_type(temp))
+            temp = (string_to_list_type(str(temp[0])))
             print(type(temp),temp)
             ret = list1 + temp + list3
             print('nret',ret)
@@ -114,10 +123,13 @@ def evaluate(polynom,str_warn=0):
             list2.append(polynom[i])
         temp1 = evaluate(list1)
         temp2 = evaluate(list2)
-        if temp1 == 'true' or temp2 == 'true' :
-            return "true"
-        else:
-            return "false"
+        expected_result = None
+        if temp2[1] == None and temp2[1] == None:    
+            if temp1[0] == 'true' or temp2[0] == 'true' :
+                expected_result = "true"
+            else:
+                expected_result = "false"
+        return check_errors(temp1,temp2,expected_result)
     elif ('and','operator') in polynom:
         temp = len(polynom)
         operator_pos = -1
@@ -132,10 +144,13 @@ def evaluate(polynom,str_warn=0):
             list2.append(polynom[i])
         temp1 = evaluate(list1)
         temp2 = evaluate(list2)
-        if temp1 == temp2 == "true" :
-            return "true"
-        else:
-            return "false"
+        expected_result = None
+        if temp1[1] == None and temp2[1] == None:    
+            if temp1[0] == temp2[0] == "true" :
+                expected_result = "true"
+            else:
+                expected_result = "false"
+        return check_errors(temp1,temp2,expected_result)
     elif ('not','operator') in polynom:
         temp = len(polynom)
         operator_pos = -1
@@ -146,119 +161,167 @@ def evaluate(polynom,str_warn=0):
             t+=1
         for i in range(polynom.index(('not','operator'))+1,temp):
             list1.append(polynom[i])
+        print(list1)
+        if list1 == []:
+            return (None,"Error: Missing boolean operation after 'not'")
         temp1 = evaluate(list1)
-        if temp1 == "false" or 0:
-            return "true"
-        else:
-            return "false"
+        expected_result = None
+        if temp1[1] == None:    
+            if temp1[0] == "false" or "0":
+                expected_result = "true"
+            else:
+                expected_result = "false"
+        return check_errors(temp1,(None,None),expected_result)
     elif ("==","operator") in polynom:
         for i in range(polynom.index(('==','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('==','operator'))+1,len(polynom)):
             list2.append(polynom[i])
         if str_warn == 1:
-            temp1 = str(evaluate(list1,1))
-            temp2 = str(evaluate(list2,1))
+            temp1,Error1 = evaluate(list1,1)
+            temp2,Error2 = evaluate(list2,1)
+            str(temp1)
+            str(temp2)
         else:
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
-        if temp1 == temp2:
-            return 'true'
-        else:
-            return 'false'
+            temp1, Error1 = evaluate(list1)
+            temp2, Error2 = evaluate(list2)
+        print("n==",temp1,temp2)
+        expected_result = None
+        if Error1 == None and Error2 == None:    
+            if temp1 == temp2:
+                expected_result = 'true'
+            else:
+                expected_result = 'false'
+        return check_errors((temp1,Error1),(temp2,Error2),expected_result)
     elif ("<=","operator") in polynom:
         for i in range(polynom.index(('<=','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('<=','operator'))+1,len(polynom)):
             list2.append(polynom[i])
         if str_warn == 1:
-            temp1 = str(evaluate(list1,1))
-            temp2 = str(evaluate(list2,1))
+            temp1,Error1 = evaluate(list1,1)
+            temp2,Error2 = evaluate(list2,1)
+            str(temp1)
+            str(temp2)
         else:
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
-        if temp1 <= temp2:
-            return 'true'
-        else:
-            return 'false'
+            temp1, Error1 = evaluate(list1)
+            temp2, Error2 = evaluate(list2)
+        expected_result = None
+        if Error1 == None and Error2 == None:    
+            if temp1 <= temp2:
+                expected_result = 'true'
+            else:
+                expected_result = 'false'
+        return check_errors((temp1,Error1),(temp2,Error2),expected_result)
     elif (">=","operator") in polynom:
         for i in range(polynom.index(('>=','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('>=','operator'))+1,len(polynom)):
             list2.append(polynom[i])
         if str_warn == 1:
-            temp1 = str(evaluate(list1,1))
-            temp2 = str(evaluate(list2,1))
+            temp1,Error1 = evaluate(list1,1)
+            temp2,Error2 = evaluate(list2,1)
+            str(temp1)
+            str(temp2)
         else:
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
-        if temp1 >= temp2:
-            return 'true'
-        else:
-            return 'false'
+            temp1, Error1 = evaluate(list1)
+            temp2, Error2 = evaluate(list2)
+        expected_result = None
+        if Error1 == None and Error2 == None:    
+            if temp1 >= temp2:
+                expected_result = 'true'
+            else:
+                expected_result = 'false'
+        return check_errors((temp1,Error1),(temp2,Error2),expected_result)
     elif ("<>","operator") in polynom:
         for i in range(polynom.index(('<>','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('<>','operator'))+1,len(polynom)):
             list2.append(polynom[i])
         if str_warn == 1:
-            temp1 = str(evaluate(list1,1))
-            temp2 = str(evaluate(list2,1))
+            temp1,Error1 = evaluate(list1,1)
+            temp2,Error2 = evaluate(list2,1)
+            str(temp1)
+            str(temp2)
         else:
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
-        if temp1 != temp2:
-            return 'true'
-        else:
-            return 'false'
+            temp1, Error1 = evaluate(list1)
+            temp2, Error2 = evaluate(list2)
+        expected_result = None
+        if Error1 == None and Error2 == None:    
+            if temp1 != temp2:
+                expected_result = 'true'
+            else:
+                expected_result = 'false'
+        return check_errors((temp1,Error1),(temp2,Error2),expected_result)
     elif ("<","operator") in polynom:
         for i in range(polynom.index(('<','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('<','operator'))+1,len(polynom)):
             list2.append(polynom[i])
         if str_warn == 1:
-            temp1 = str(evaluate(list1,1))
-            temp2 = str(evaluate(list2,1))
+            temp1,Error1 = evaluate(list1,1)
+            temp2,Error2 = evaluate(list2,1)
+            str(temp1)
+            str(temp2)
         else:
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
-        if temp1 < temp2:
-            return 'true'
-        else:
-            return 'false'
+            temp1, Error1 = evaluate(list1)
+            temp2, Error2 = evaluate(list2)
+        expected_result = None
+        if Error1 == None and Error2 == None:    
+            if temp1 < temp2:
+                expected_result = 'true'
+            else:
+                expected_result = 'false'
+        return check_errors((temp1,Error1),(temp2,Error2),expected_result)
     elif (">","operator") in polynom:
         for i in range(polynom.index(('>','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('>','operator'))+1,len(polynom)):
             list2.append(polynom[i])
         if str_warn == 1:
-            temp1 = str(evaluate(list1,1))
-            temp2 = str(evaluate(list2,1))
+            temp1,Error1 = evaluate(list1,1)
+            temp2,Error2 = evaluate(list2,1)
+            str(temp1)
+            str(temp2)
         else:
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
-        if temp1 > temp2:
-            return 'true'
-        else:
-            return 'false'
+            temp1, Error1 = evaluate(list1)
+            temp2, Error2 = evaluate(list2)
+        expected_result = None
+        if Error1 == None and Error2 == None:
+            if temp1 > temp2:
+                expected_result = 'true'
+            else:
+                expected_result = 'false'
+        return check_errors((temp1,Error1),(temp2,Error2),expected_result)
     elif ('+','operator') in polynom:
         for i in range(polynom.index(('+','operator'))):
             list1.append(polynom[i])
         for i in range(polynom.index(('+','operator'))+1,len(polynom)):
             list2.append(polynom[i])
         if str_warn == 1:
-            temp1 = str(evaluate(list1,1))
-            temp2 = str(evaluate(list2,1))
+            temp1,Error1 = evaluate(list1,1)
+            temp2,Error2 = evaluate(list2,1)
+            str(temp1)
+            str(temp2)
         else:
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
-        return temp1 + temp2
+            temp1, Error1 = evaluate(list1)
+            temp2, Error2 = evaluate(list2)
+        expected_result = None
+        if Error1 == None and Error2 == None:    
+            expected_result = temp1 + temp2
+        return check_errors([temp1,Error1],[temp2,Error2],expected_result)
     elif ('-','operator') in polynom and str_warn == 0:
-            for i in range(polynom.index(('-','operator'))):
-                list1.append(polynom[i])
-            for i in range(polynom.index(('-','operator'))+1,len(polynom)):
-                list2.append(polynom[i])
-            return evaluate(list1) - evaluate(list2)
+        print('nsous')
+        for i in range(polynom.index(('-','operator'))):
+            list1.append(polynom[i])
+        for i in range(polynom.index(('-','operator'))+1,len(polynom)):
+            list2.append(polynom[i])
+        temp1 = evaluate(list1)
+        temp2 = evaluate(list2)
+        expected_result = None
+        if temp1[1] == None and temp2[1] == None:
+            expected_result = temp1[0]-temp2[0]
+        return check_errors(temp1,temp2,expected_result)
     elif (('/','operator') in polynom) or (('*','operator') in polynom) and str_warn == 0:
         try:
             index_div = polynom.index(('/','operator'))
@@ -275,10 +338,11 @@ def evaluate(polynom,str_warn=0):
                 list2.append(polynom[i])
             temp1 = evaluate(list1)
             temp2 = evaluate(list2)
-            if (temp1 and temp2) != "Error: Division by zero":
-                return temp1 * temp2
-            else:
-                return "Error: Division by zero" 
+            expected_result = None
+            if temp1[1] == None and temp2[1] == None:    
+                expected_result = temp1[0]*temp2[0]
+            print(check_errors(temp1,temp2,expected_result))
+            return check_errors(temp1,temp2,expected_result)
         else:
             for i in range(index_div):
                 list1.append(polynom[i])
@@ -286,21 +350,21 @@ def evaluate(polynom,str_warn=0):
                 list2.append(polynom[i])
             temp1 = evaluate(list1)
             temp2 = evaluate(list2)
-            print('ntemp',temp1,temp2)
-            if (temp1 and temp2) != "Error: Division by zero":
-                if temp2 == 0:
-                    return "Error: Division by zero"
-                return temp1 / temp2
+            if temp2[0] == 0 and temp2[1] is None:
+                return (None,"Error: division by zero")
             else:
-                return "Error: Division by zero"
+                expected_result = None
+                if temp1[1] == None and temp2[1] == None:    
+                    expected_result = temp1[0] / temp2[0]
+                return check_errors(temp1,temp2,expected_result)
     elif polynom == []:
-        return 0
+        return (0,None)
     else:
         print("poly",polynom)
         if len(polynom) <= 1:
             if polynom[0][1] in ["string","boolean"]:
-                return polynom[0][0]
+                return (polynom[0][0],None)
             elif polynom[0][1]=='integer':
-                return int(polynom[0][0])
+                return (float(polynom[0][0]),None)
         else:
-            return "Error: Wrong syntax"
+            return (None,"Error: Wrong syntax")
