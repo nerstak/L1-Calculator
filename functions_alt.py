@@ -93,7 +93,7 @@ def fill_list(operator,polynom): #Commons lines of several parts of the program,
         list2.append(polynom[i])
     return list1,list2
 
-def float_to_int(nb):
+def float_to_int(nb): #Removing the float if its null
     if int(float(nb))==float(nb):
         return int(float(nb))
     else:
@@ -286,14 +286,15 @@ def evaluate(polynom,str_warn=0): #Main part of the program
         list1,list2 = fill_list('-',polynom) 
         if list2 == []:
             return (None,'Error: Missing operand near "-"')
-        elif list1 == []:
-            list1.append((0,"integer"))
+        elif list1 == [] : #For a negative number
             return evaluate([('-1','integer'),('*','operator')]+list2)
+        elif list1[-1][1] == 'operator': #For a negative number part of calculation
+            return evaluate([('-','operator')]+list1+list2)
         temp1 = evaluate(list1)
         temp2 = evaluate(list2)
         expected_result = None
         if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if type(temp1[0]) == str:
+            if type(temp1[0]) == str: #Remove one string from another
                 return (temp1[0].replace(str(temp2[0]),''),None)
             elif type_calc(temp1[0]) != 'integer' or type_calc(temp2[0]) != 'integer':
                 return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" - "+type_calc(temp2[0])+")")
@@ -362,7 +363,7 @@ def evaluate(polynom,str_warn=0): #Main part of the program
                 if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1  
                     expected_result = float_to_int(temp1[0] % temp2[0])
                 return check_errors(temp1,temp2,expected_result) #Return error message or the result
-    elif ('#','operator') in polynom: #Operator to reverse any string
+    elif ('#','operator') in polynom: #Operator to reverse any string #Most important operator
         list1 = []
         for i in range(polynom.index(('#','operator'))+1,len(polynom)):
             list1.append(polynom[i])
