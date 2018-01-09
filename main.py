@@ -48,7 +48,6 @@ while exit == False:
                     for i in list_entry:
                         print(i[0],end=" ")
                     print("=")
-                    print(functions_alt.evaluate(list_entry))
                     Result, *Error = functions_alt.evaluate(list_entry) #Result stores the result (in the first container) and Error everything else
                     if Error[0] is not None: #If there is an error, print the error
                         print(Error[0])
