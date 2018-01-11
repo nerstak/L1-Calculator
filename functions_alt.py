@@ -28,13 +28,13 @@ def evaluation_of_two(list1,list2,str_warn=0): #Promoting non-string value to st
         return evaluate(list1),evaluate(list2)
 
 def fill_list(operator,polynom): #plit the polynom into two lists, excluding the concerned operator. Used in evaluate()
-    list1=[]
-    list2=[]
+    leftPart=[]
+    rightPart=[]
     for i in range(polynom.index((operator,'operator'))):
-        list1.append(polynom[i])
+        leftPart.append(polynom[i])
     for i in range(polynom.index((operator,'operator'))+1,len(polynom)):
-        list2.append(polynom[i])
-    return list1,list2
+        rightPart.append(polynom[i])
+    return leftPart,rightPart
 
 def float_to_int(nb): #Removing the float if its null. Used in evaluate() and string_to_list_type()
     if int(float(nb))==float(nb):
@@ -127,182 +127,182 @@ def evaluate(polynom,str_warn=0): #Main part of the program
             elif polynom[i][0] == ')' and nbr_p != 1:
                 nbr_p -= 1
             i += 1
-        list1 = []
-        list2 = []
-        list3 = []
-        for i in range(polynom.index(('(','parenthesis'))): #List1 is for everything before parenthesis
-            list1.append(polynom[i])
-        for i in range(polynom.index(('(','parenthesis'))+1,pos_p): #List2 is for everything inside the parenthesis
-            list2.append(polynom[i])
-        for i in range(pos_p+1,len(polynom)): #List3 is for everything after parenthesis
-            list3.append(polynom[i])
-        temp = evaluate(list2) #Compute inside of parenthesis
-        if temp[1] is not None: #If there is an error inside the parenthesis, stop everything and directly return the error
+        leftPart = []
+        insidePart = []
+        rightPart = []
+        for i in range(polynom.index(('(','parenthesis'))): #leftPart is for everything before parenthesis
+            leftPart.append(polynom[i])
+        for i in range(polynom.index(('(','parenthesis'))+1,pos_p): #insidePart is for everything inside the parenthesis
+            insidePart.append(polynom[i])
+        for i in range(pos_p+1,len(polynom)): #rightPart is for everything after parenthesis
+            rightPart.append(polynom[i])
+        resultPart = evaluate(insidePart) #Compute inside of parenthesis
+        if resultPart[1] is not None: #If there is an error inside the parenthesis, stop everything and directly return the error
             return (None,temp[1])
         else:
-            temp, Error = string_to_list_type(str(temp[0])) #Transforming the result ( which is a string) into a list
+            listResult, Error = string_to_list_type(str(resultPart[0])) #Transforming the result ( which is a string) into a list
             if temp[0][1] == 'variable': #If it is a variable, it means that it is a string that couln't have been recognised because they were no quotation marks
-                ret = list1 + [(temp[0][0],'string')] + list3
+                ret = leftPart + [(listResult[0][0],'string')] + rightPart
             else:
-                ret = list1 + temp + list3
+                ret = leftPart + listResult + rightPart
             return (evaluate(ret))
     elif ('or','operator') in polynom: #Less important operator precedence
-        list1,list2 = fill_list('or',polynom) 
-        if list1 == [] or list2 == []:
+        leftPart,rightPart = fill_list('or',polynom) 
+        if leftPart == [] or rightPart == []:
             return (None,'Error: Missing operand near "or"')
-        temp1 = evaluate(list1)
-        temp2 = evaluate(list2)
+        resultLeft = evaluate(leftPart)
+        resultRight = evaluate(rightPart)
         expected_result = None
-        if temp2[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if temp1[0] == 'true' or temp2[0] == 'true' :
+        if resultRight[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1
+            if resultLeft[0] == 'true' or resultRight[0] == 'true' :
                 expected_result = "true"
             else:
                 expected_result = "false"
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif ('and','operator') in polynom:
-        list1,list2 = fill_list('and',polynom) 
-        if list1 == [] or list2 == []:
+        leftPart,rightPart = fill_list('and',polynom) 
+        if leftPart == [] or rightPart == []:
             return (None,'Error: Missing operand near "and"')
-        temp1 = evaluate(list1)
-        temp2 = evaluate(list2)
+        resultLeft = evaluate(leftPart)
+        resultRight = evaluate(rightPart)
         expected_result = None
-        if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if temp1[0] == temp2[0] == "true" :
+        if resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1
+            if resultLeft[0] == resultRight[0] == "true" :
                 expected_result = "true"
             else:
                 expected_result = "false"
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif ('not','operator') in polynom:
-        list1, list2 = fill_list('not',polynom)
-        temp2 = evaluate(list2)
+        leftPart, rightPart = fill_list('not',polynom)
+        resultRight = evaluate(rightPart)
         expected_result = None
-        if temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if temp2[0] in  ("false","0",0):
-                return evaluate(list1+[("true","boolean")])
+        if resultRight[1] == None: #Checking if they were no errors, stored in the index 1
+            if resultRight[0] in  ("false","0",0):
+                return evaluate(leftPart+[("true","boolean")])
             else:
-                return evaluate(list1+[("false","boolean")])
+                return evaluate(leftPart+[("false","boolean")])
         else:
-            return (None,temp2[1]) #Return error message or the result
+            return (None,resultRight[1]) #Return error message or the result
     elif ("==","operator") in polynom: 
-        list1,list2 = fill_list('==',polynom)
-        if list1 == [] or list2 == []:
+        leftPart,rightPart = fill_list('==',polynom)
+        if leftPart == [] or rightPart == []:
             return (None,'Error: Missing operand near "=="')
-        temp1,temp2 = evaluation_of_two(list1,list2,str_warn)
+        resultLeft,resultRight = evaluation_of_two(leftPart,rightPart,str_warn)
         expected_result = None
-        if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1  
-            if temp1[0] == temp2[0]:
+        if resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1  
+            if resultLeft[0] == resultRight[0]:
                 expected_result = 'true'
             else:
                 expected_result = 'false'
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif ("<=","operator") in polynom:
-        list1,list2 = fill_list('<=',polynom)
-        if list1 == [] or list2 == []:
+        leftPart,rightPart = fill_list('<=',polynom)
+        if leftPart == [] or rightPart == []:
             return (None,'Error: Missing operand near "<="')
-        temp1,temp2 = evaluation_of_two(list1,list2,str_warn)
+        resultLeft,resultRight = evaluation_of_two(leftPart,rightPart,str_warn)
         expected_result = None
-        if temp1[1] == None and temp2[1] == None:  #Checking if they were no errors, stored in the index 1
-            if (type_calc(temp1[0]) in ['string','boolean'] and type_calc(temp2[0]) in ['string','boolean']) or (type_calc(temp1[0]) == type_calc(temp2[0]) == 'integer'):
-                if temp1[0] <= temp2[0]:
+        if resultLeft[1] == None and resultRight[1] == None:  #Checking if they were no errors, stored in the index 1
+            if (type_calc(resultLeft[0]) in ['string','boolean'] and type_calc(resultRight[0]) in ['string','boolean']) or (type_calc(resultLeft[0]) == type_calc(resultRight[0]) == 'integer'):
+                if resultLeft[0] <= resultRight[0]:
                     expected_result = 'true'
                 else:
                     expected_result = 'false'
             else:
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" <= "+type_calc(temp2[0])+")")
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+                return (None,"Error: Type mismatch ("+type_calc(resultLeft[0])+" <= "+type_calc(resultRight[0])+")")
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif (">=","operator") in polynom:
-        list1,list2 = fill_list('>=',polynom)
-        if list1 == [] or list2 == []:
+        leftPart,rightPart = fill_list('>=',polynom)
+        if leftPart == [] or rightPart == []:
             return (None,'Error: Missing operand near ">="')
-        temp1,temp2 = evaluation_of_two(list1,list2,str_warn)
+        resultLeft,resultRight = evaluation_of_two(leftPart,rightPart,str_warn)
         expected_result = None
-        if temp1[1] == None and temp2[1] == None:  #Checking if they were no errors, stored in the index 1 
-            if (type_calc(temp1[0]) in ['string','boolean'] and type_calc(temp2[0]) in ['string','boolean']) or (type_calc(temp1[0]) == type_calc(temp2[0]) == 'integer'):
-                if temp1[0] >= temp2[0]:
+        if resultLeft[1] == None and resultRight[1] == None:  #Checking if they were no errors, stored in the index 1 
+            if (type_calc(resultLeft[0]) in ['string','boolean'] and type_calc(resultRight[0]) in ['string','boolean']) or (type_calc(resultLeft[0]) == type_calc(resultRight[0]) == 'integer'):
+                if resultLeft[0] >= resultRight[0]:
                     expected_result = 'true'
                 else:
                     expected_result = 'false'
             else:
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" >= "+type_calc(temp2[0])+")")
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+                return (None,"Error: Type mismatch ("+type_calc(resultLeft[0])+" >= "+type_calc(resultRight[0])+")")
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif ("<>","operator") in polynom:
-        list1,list2 = fill_list('<>',polynom)
-        if list1 == [] or list2 == []:
+        leftPart,rightPart = fill_list('<>',polynom)
+        if leftPart == [] or rightPart == []:
             return (None,'Error: Missing operand near "<>"')
-        temp1,temp2 = evaluation_of_two(list1,list2,str_warn)
+        resultLeft,resultRight = evaluation_of_two(leftPart,rightPart,str_warn)
         expected_result = None
-        if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if temp1[0] != temp2[0]:
+        if resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1
+            if resultLeft[0] != resultRight[0]:
                 expected_result = 'true'
             else:
                 expected_result = 'false'
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif ("<","operator") in polynom:
-        list1,list2 = fill_list('<',polynom)
-        if list1 == [] or list2 == []:
+        leftPart,rightPart = fill_list('<',polynom)
+        if leftPart == [] or rightPart == []:
             return (None,'Error: Missing operand near "<"')
-        temp1,temp2 = evaluation_of_two(list1,list2,str_warn)
+        resultLeft,resultRight = evaluation_of_two(leftPart,rightPart,str_warn)
         expected_result = None
-        if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if (type_calc(temp1[0]) in ['string','boolean'] and type_calc(temp2[0]) in ['string','boolean']) or (type_calc(temp1[0]) == type_calc(temp2[0]) == 'integer'):
-                if temp1[0] < temp2[0]:
+        if resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1
+            if (type_calc(resultLeft[0]) in ['string','boolean'] and type_calc(resultRight[0]) in ['string','boolean']) or (type_calc(resultLeft[0]) == type_calc(resultRight[0]) == 'integer'):
+                if resultLeft[0] < resultRight[0]:
                     expected_result = 'true'
                 else:
                     expected_result = 'false'
             else:
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" < "+type_calc(temp2[0])+")")
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+                return (None,"Error: Type mismatch ("+type_calc(resultLeft[0])+" < "+type_calc(resultRight[0])+")")
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif (">","operator") in polynom:
-        list1,list2 = fill_list('>',polynom)
-        if list1 == [] or list2 == []:
+        leftPart,rightPart = fill_list('>',polynom)
+        if leftPart == [] or rightPart == []:
             return (None,'Error: Missing operand near ">"')
-        temp1,temp2 = evaluation_of_two(list1,list2,str_warn)
+        resultLeft,resultRight = evaluation_of_two(leftPart,rightPart,str_warn)
         expected_result = None
-        if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if (type_calc(temp1[0]) in ['string','boolean'] and type_calc(temp2[0]) in ['string','boolean']) or (type_calc(temp1[0]) == type_calc(temp2[0]) == 'integer'):
-                if temp1[0] > temp2[0]:
+        if resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1
+            if (type_calc(resultLeft[0]) in ['string','boolean'] and type_calc(resultRight[0]) in ['string','boolean']) or (type_calc(resultLeft[0]) == type_calc(resultRight[0]) == 'integer'):
+                if resultLeft[0] > resultRight[0]:
                     expected_result = 'true'
                 else:
                     expected_result = 'false'
             else:
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" > "+type_calc(temp2[0])+")")
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+                return (None,"Error: Type mismatch ("+type_calc(resultLeft[0])+" > "+type_calc(resultRight[0])+")")
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif ('+','operator') in polynom:
-        list1,list2 = fill_list('+',polynom)
-        if list1 == [] or list2 == []:
+        leftPart,rightPart = fill_list('+',polynom)
+        if leftPart == [] or rightPart == []:
             return (None,'Error: Missing operand near "+"')
-        temp1,temp2 = evaluation_of_two(list1,list2,str_warn)
+        resultLeft,resultRight = evaluation_of_two(leftPart,rightPart,str_warn)
         expected_result = None
-        if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
+        if resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1
             if str_warn == 1:
-                expected_result = str(temp1[0])+str(temp2[0])
-            elif type_calc(temp1[0]) != 'integer' or type_calc(temp2[0]) != 'integer':
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" + "+type_calc(temp2[0])+")")
+                expected_result = str(resultLeft[0])+str(resultRight[0])
+            elif type_calc(resultLeft[0]) != 'integer' or type_calc(resultRight[0]) != 'integer':
+                return (None,"Error: Type mismatch ("+type_calc(resultLeft[0])+" + "+type_calc(resultRight[0])+")")
             else:
-                expected_result = temp1[0] + temp2[0]
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+                expected_result = resultLeft[0] + resultRight[0]
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif ('-','operator') in polynom:
-        list1,list2 = fill_list('-',polynom)
-        temp2 = evaluate(list2) 
-        if list2 == [] or type_calc(temp2[0]) != 'integer' and (list1 == [] or list1[-1][1] == 'operator'):
+        leftPart,rightPart = fill_list('-',polynom)
+        resultRight = evaluate(rightPart) 
+        if rightPart == [] or type_calc(resultRight[0]) != 'integer' and (leftPart == [] or leftPart[-1][1] == 'operator'):
             return (None,'Error: Missing operand near "-"')
-        elif list1 == []: #For a negative number
-            return evaluate([('-1','integer'),('*','operator')]+list2)
-        elif list1[-1][1] == 'operator': #For a negative number part of calculation
-            return evaluate([('-','operator')]+list1+list2)
-        temp1 = evaluate(list1)
+        elif leftPart == []: #For a negative number
+            return evaluate([('-1','integer'),('*','operator')]+rightPart)
+        elif leftPart[-1][1] == 'operator': #For a negative number part of calculation
+            return evaluate([('-','operator')]+leftPart+rightPart)
+        resultLeft = evaluate(leftPart)
         expected_result = None
-        if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if type(temp1[0]) == str: #Remove one string from another
-                return (temp1[0].replace(str(temp2[0]),''),None)
-            elif type_calc(temp1[0]) != 'integer' or type_calc(temp2[0]) != 'integer':
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" - "+type_calc(temp2[0])+")")
+        if resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1
+            if type(resultLeft[0]) == str: #Remove one string from another
+                return (resultLeft[0].replace(str(resultRight[0]),''),None)
+            elif type_calc(resultLeft[0]) != 'integer' or type_calc(resultRight[0]) != 'integer':
+                return (None,"Error: Type mismatch ("+type_calc(resultLeft[0])+" - "+type_calc(resultRight[0])+")")
             else:
-                expected_result = temp1[0]-temp2[0]
-        return check_errors(temp1,temp2,expected_result) #Return error message or the result
+                expected_result = resultLeft[0]-resultRight[0]
+        return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif ('/','operator') in polynom or ('*','operator') in polynom or ('%','operator') in polynom:
-        list1 = []
-        list2 = []
+        leftPart = []
+        rightPart = []
         index_div = index_mult = index_mod = -1
         for i in range(len(polynom)): #For to determine the last operator
             if polynom[i][0] == '*':
@@ -313,65 +313,65 @@ def evaluate(polynom,str_warn=0): #Main part of the program
                 index_mod = i
         if index_div < index_mult and index_mod < index_mult: #The last operator will be used to split (here *)
             for i in range(index_mult): #Splitting into two lists, excluding the operator
-                list1.append(polynom[i])
+                leftPart.append(polynom[i])
             for i in range(index_mult+1,len(polynom)):
-                list2.append(polynom[i])
-            if list1 == [] or list2 == []:
+                rightPart.append(polynom[i])
+            if leftPart == [] or rightPart == []:
                 return (None,'Error: Missing operand near "*"')
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
+            resultLeft = evaluate(leftPart)
+            resultRight = evaluate(rightPart)
             expected_result = None
-            if type_calc(temp1[0]) != 'integer' or type_calc(temp2[0]) != 'integer':
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" * "+type_calc(temp2[0])+")")
-            elif temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-                expected_result = float_to_int(temp1[0] * temp2[0])
-            return check_errors(temp1,temp2,expected_result) #Return error message or the result
+            if type_calc(resultLeft[0]) != 'integer' or type_calc(resultRight[0]) != 'integer':
+                return (None,"Error: Type mismatch ("+type_calc(resultLeft[0])+" * "+type_calc(resultRight[0])+")")
+            elif resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1
+                expected_result = float_to_int(resultLeft[0] * resultRight[0])
+            return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
         elif index_mult < index_div and index_mod < index_div: #The last operator will be used to split (here /)
             for i in range(index_div): #Splitting into two lists, excluding the operator
-                list1.append(polynom[i])
+                leftPart.append(polynom[i])
             for i in range(index_div+1,len(polynom)):
-                list2.append(polynom[i])
-            if list1 == [] or list2 == []:
+                rightPart.append(polynom[i])
+            if leftPart == [] or rightPart == []:
                 return (None,'Error: Missing operand near "/"')
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
-            if temp2[0] == 0 and temp2[1] is None:
+            resultLeft = evaluate(leftPart)
+            resultRight = evaluate(rightPart)
+            if resultRight[0] == 0 and resultRight[1] is None:
                 return (None,"Error: Division by zero")
-            elif type_calc(temp1[0]) != 'integer' or type_calc(temp2[0]) != 'integer':
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" / "+type_calc(temp2[0])+")")
+            elif type_calc(resultLeft[0]) != 'integer' or type_calc(resultRight[0]) != 'integer':
+                return (None,"Error: Type mismatch ("+type_calc(resultLeft[0])+" / "+type_calc(resultRight[0])+")")
             else:
                 expected_result = None
-                if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1    
-                    expected_result = float_to_int(temp1[0] / temp2[0])
-                return check_errors(temp1,temp2,expected_result) #Return error message or the result
+                if resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1    
+                    expected_result = float_to_int(resultLeft[0] / resultRight[0])
+                return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
         else: #The last operator will be used to split (here %)
             for i in range(index_mod): #Splitting into two lists, excluding the operator
-                list1.append(polynom[i])
+                leftPart.append(polynom[i])
             for i in range(index_mod+1,len(polynom)):
-                list2.append(polynom[i])
-            if list1 == [] or list2 == []:
+                rightPart.append(polynom[i])
+            if leftPart == [] or rightPart == []:
                 return (None,'Error: Missing operand near "%"')
-            temp1 = evaluate(list1)
-            temp2 = evaluate(list2)
-            if temp2[0] == 0 and temp2[1] is None:
+            resultLeft = evaluate(leftPart)
+            resultRight = evaluate(rightPart)
+            if resultRight[0] == 0 and resultRight[1] is None:
                 return (None,"Error: Division by zero")
-            elif type_calc(temp1[0]) != 'integer' or type_calc(temp2[0]) != 'integer':
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" % "+type_calc(temp2[0])+")")
+            elif type_calc(resultLeft[0]) != 'integer' or type_calc(resultRight[0]) != 'integer':
+                return (None,"Error: Type mismatch ("+type_calc(resultLeft[0])+" % "+type_calc(resultRight[0])+")")
             else:
                 expected_result = None
-                if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1  
-                    expected_result = float_to_int(temp1[0] % temp2[0])
-                return check_errors(temp1,temp2,expected_result) #Return error message or the result
+                if resultLeft[1] == None and resultRight[1] == None: #Checking if they were no errors, stored in the index 1  
+                    expected_result = float_to_int(resultLeft[0] % resultRight[0])
+                return check_errors(resultLeft,resultRight,expected_result) #Return error message or the result
     elif ('#','operator') in polynom: #Operator to reverse any string #Most important operator
-        list1,list2 = fill_list('#',polynom)
-        temp2 = evaluate(list2)
-        if temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if type_calc(temp2[0]) != 'string':
+        leftPart,rightPart = fill_list('#',polynom)
+        resultRight = evaluate(rightPart)
+        if resultRight[1] == None: #Checking if they were no errors, stored in the index 1
+            if type_calc(resultRight[0]) != 'string':
                 return (None,'Error: Inverter only accept string')
             else:
-                return evaluate(list1+[(temp2[0][::-1],'string')])
+                return evaluate(leftPart+[(resultRight[0][::-1],'string')])
         else:
-            return (None,temp2[1])
+            return (None,resultRight[1])
     elif polynom == []: #If polynom is empty
         return (0,None)
     else:
