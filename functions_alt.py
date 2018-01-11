@@ -1,4 +1,5 @@
-def type_calc(x): #This function defines the type of the variable put in. It doesn't work with string
+#Currents functions
+def type_calc(x): #This function defines the type of the variable put in. Used in string_to_list_type()
     if x in ["/","-","+","*","==","<",">","<>","<=",">=","not","and","or","#","%"] :
         return 'operator'
     elif x == '(' or x == ')':
@@ -12,6 +13,36 @@ def type_calc(x): #This function defines the type of the variable put in. It doe
         except ValueError:
             return 'string'
 
+def check_errors(array1,array2,result): #Function to check if they are any error for some parts, and return them easily. Used in evaluate()
+    if array1[1] == array2[1] == None:
+        return (result,None)
+    elif array1[1] != None:    
+        return (None,array1[1])
+    else:
+        return (None,array2[1])
+
+def evaluation_of_two(list1,list2,str_warn=0): #Promoting non-string value to string if it is asked. Used in evaluate()
+    if str_warn == 1:
+        return evaluate(list1,1),evaluate(list2,1)
+    else:
+        return evaluate(list1),evaluate(list2)
+
+def fill_list(operator,polynom): #plit the polynom into two lists, excluding the concerned operator. Used in evaluate()
+    list1=[]
+    list2=[]
+    for i in range(polynom.index((operator,'operator'))):
+        list1.append(polynom[i])
+    for i in range(polynom.index((operator,'operator'))+1,len(polynom)):
+        list2.append(polynom[i])
+    return list1,list2
+
+def float_to_int(nb): #Removing the float if its null. Used in evaluate() and string_to_list_type()
+    if int(float(nb))==float(nb):
+        return int(float(nb))
+    else:
+        return float(nb)
+
+#Processing functions
 def string_to_list_type(string): #Function to converts a string into a list of list. Container 0 is the content, Container 1 is the type of content
     list = []
     i = 0
@@ -70,35 +101,6 @@ def string_to_list_type(string): #Function to converts a string into a list of l
             i+=1
     return (list,None)
 
-def check_errors(array1,array2,result): #Function to check if they are any error for some parts, and return them easily
-    if array1[1] == array2[1] == None:
-        return (result,None)
-    elif array1[1] != None:    
-        return (None,array1[1])
-    else:
-        return (None,array2[1])
-
-def evaluation_of_two(list1,list2,str_warn=0): #Commons lines of severals parts of the program, to enter the good parameters for the evaluation
-    if str_warn == 1:
-        return evaluate(list1,1),evaluate(list2,1)
-    else:
-        return evaluate(list1),evaluate(list2)
-
-def fill_list(operator,polynom): #Commons lines of several parts of the program, to split the polynom into two lists, excluding the concerned operator
-    list1=[]
-    list2=[]
-    for i in range(polynom.index((operator,'operator'))):
-        list1.append(polynom[i])
-    for i in range(polynom.index((operator,'operator'))+1,len(polynom)):
-        list2.append(polynom[i])
-    return list1,list2
-
-def float_to_int(nb): #Removing the float if its null
-    if int(float(nb))==float(nb):
-        return int(float(nb))
-    else:
-        return float(nb)
-
 def evaluate(polynom,str_warn=0): #Main part of the program
     for i in polynom: #str_warn is used for promotting any type to string
         if i[1] == "string":
@@ -138,8 +140,8 @@ def evaluate(polynom,str_warn=0): #Main part of the program
         if temp[1] is not None: #If there is an error inside the parenthesis, stop everything and directly return the error
             return (None,temp[1])
         else:
-            temp, Error = string_to_list_type(str(temp[0])) #Transforming the result (a string) into a list
-            if temp[0][1] == 'variable': #If it is a variable, it means that it is a string that couln't have been recognised because they were no quote
+            temp, Error = string_to_list_type(str(temp[0])) #Transforming the result ( which is a string) into a list
+            if temp[0][1] == 'variable': #If it is a variable, it means that it is a string that couln't have been recognised because they were no quotation marks
                 ret = list1 + [(temp[0][0],'string')] + list3
             else:
                 ret = list1 + temp + list3
@@ -171,19 +173,16 @@ def evaluate(polynom,str_warn=0): #Main part of the program
                 expected_result = "false"
         return check_errors(temp1,temp2,expected_result) #Return error message or the result
     elif ('not','operator') in polynom:
-        list1 = []
-        for i in range(polynom.index(('not','operator'))+1,len(polynom)): #Keeping only what is after the 'not'
-            list1.append(polynom[i])
-        if list1 == []:
-            return (None,"Error: Missing operand after 'not'")
-        temp1 = evaluate(list1)
+        list1, list2 = fill_list('not',polynom)
+        temp2 = evaluate(list2)
         expected_result = None
-        if temp1[1] == None: #Checking if they were no errors, stored in the index 1
-            if temp1[0] in  ("false","0",0):
-                expected_result = "true"
+        if temp2[1] == None: #Checking if they were no errors, stored in the index 1
+            if temp2[0] in  ("false","0",0):
+                return evaluate(list1+[("true","boolean")])
             else:
-                expected_result = "false"
-        return check_errors(temp1,(None,None),expected_result) #Return error message or the result
+                return evaluate(list1+[("true","boolean")])
+        else:
+            return (None,temp2[1]) #Return error message or the result
     elif ("==","operator") in polynom: 
         list1,list2 = fill_list('==',polynom)
         if list1 == [] or list2 == []:
@@ -275,7 +274,7 @@ def evaluate(polynom,str_warn=0): #Main part of the program
         temp1,temp2 = evaluation_of_two(list1,list2,str_warn)
         expected_result = None
         if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if type_calc(temp1[0]) not in ['string','integer'] or type_calc(temp2[0]) not in ['string','integer']:
+            if type_calc(temp1[0]) not in ['string','integer','boolean'] or type_calc(temp2[0]) not in ['string','integer','boolean']:
                 return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" + "+type_calc(temp2[0])+")")
             elif str_warn == 1:
                 expected_result = str(temp1[0])+str(temp2[0])
@@ -283,15 +282,15 @@ def evaluate(polynom,str_warn=0): #Main part of the program
                 expected_result = temp1[0] + temp2[0]
         return check_errors(temp1,temp2,expected_result) #Return error message or the result
     elif ('-','operator') in polynom:
-        list1,list2 = fill_list('-',polynom) 
-        if list2 == []:
+        list1,list2 = fill_list('-',polynom)
+        temp2 = evaluate(list2) 
+        if list2 == [] or type_calc(temp2[0]) != 'integer' and (list1 == [] or list1[-1][1] == 'operator'):
             return (None,'Error: Missing operand near "-"')
-        elif list1 == [] : #For a negative number
+        elif list1 == []: #For a negative number
             return evaluate([('-1','integer'),('*','operator')]+list2)
         elif list1[-1][1] == 'operator': #For a negative number part of calculation
             return evaluate([('-','operator')]+list1+list2)
         temp1 = evaluate(list1)
-        temp2 = evaluate(list2)
         expected_result = None
         if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
             if type(temp1[0]) == str: #Remove one string from another
@@ -364,17 +363,15 @@ def evaluate(polynom,str_warn=0): #Main part of the program
                     expected_result = float_to_int(temp1[0] % temp2[0])
                 return check_errors(temp1,temp2,expected_result) #Return error message or the result
     elif ('#','operator') in polynom: #Operator to reverse any string #Most important operator
-        list1 = []
-        for i in range(polynom.index(('#','operator'))+1,len(polynom)):
-            list1.append(polynom[i])
-        temp1 = evaluate(list1)
-        if temp1[1] == None: #Checking if they were no errors, stored in the index 1
-            if type_calc(temp1[0]) != 'string':
+        list1,list2 = fill_list('#',polynom)
+        temp2 = evaluate(list2)
+        if temp2[1] == None: #Checking if they were no errors, stored in the index 1
+            if type_calc(temp2[0]) != 'string':
                 return (None,'Error: Inverter only accept string')
             else:
-                return (temp1[0][::-1],None)
+                return evaluate(list1+[(temp2[0][::-1],'string')])
         else:
-            return (None,temp1[1])
+            return (None,temp2[1])
     elif polynom == []: #If polynom is empty
         return (0,None)
     else:
