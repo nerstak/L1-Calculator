@@ -69,7 +69,7 @@ def string_to_list_type(string): #Function to converts a string into a list of l
                 i+=1
             i+=1
             list.append((nb,"string"))
-        elif string[i] != " ": #Part for operator, variable
+        elif string[i] != " ": #Part for operator, variable, boolean, parenthesis
             if (type_calc(string[i]) in ["operator","parenthesis"]): #Part to recognise operator composed of two other operator or parenthesis
                 if string[i] == "<" and i+1<len(string) and string[i+1] in ["=",">"]:
                     list.append((string[i]+string[i+1],"operator"))
@@ -77,7 +77,7 @@ def string_to_list_type(string): #Function to converts a string into a list of l
                 elif string[i] == ">" and i+1<len(string) and string[i+1] == "=":
                     list.append((string[i]+string[i+1],"operator"))
                     i+=2
-                else:  
+                else: #Parenthesis or single caracters operators
                     list.append((string[i],type_calc(string[i])))
                     i+=1
             elif string[i] == '=': #Part to recognise that the user is assigning a variable or just checking equality
@@ -94,7 +94,7 @@ def string_to_list_type(string): #Function to converts a string into a list of l
                     i+=1
                 if type_calc(nb) == 'string': #If its type is string, it means it is as variable
                     list.append((nb,'variable'))
-                else:
+                else: #At the end, used for boolean operators, or boolean 
                     list.append((nb,type_calc(nb)))
         else:
             i+=1
