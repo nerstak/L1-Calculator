@@ -180,7 +180,7 @@ def evaluate(polynom,str_warn=0): #Main part of the program
             if temp2[0] in  ("false","0",0):
                 return evaluate(list1+[("true","boolean")])
             else:
-                return evaluate(list1+[("true","boolean")])
+                return evaluate(list1+[("false","boolean")])
         else:
             return (None,temp2[1]) #Return error message or the result
     elif ("==","operator") in polynom: 
@@ -274,10 +274,10 @@ def evaluate(polynom,str_warn=0): #Main part of the program
         temp1,temp2 = evaluation_of_two(list1,list2,str_warn)
         expected_result = None
         if temp1[1] == None and temp2[1] == None: #Checking if they were no errors, stored in the index 1
-            if type_calc(temp1[0]) not in ['string','integer','boolean'] or type_calc(temp2[0]) not in ['string','integer','boolean']:
-                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" + "+type_calc(temp2[0])+")")
-            elif str_warn == 1:
+            if str_warn == 1:
                 expected_result = str(temp1[0])+str(temp2[0])
+            elif type_calc(temp1[0]) != 'integer' or type_calc(temp2[0]) != 'integer':
+                return (None,"Error: Type mismatch ("+type_calc(temp1[0])+" + "+type_calc(temp2[0])+")")
             else:
                 expected_result = temp1[0] + temp2[0]
         return check_errors(temp1,temp2,expected_result) #Return error message or the result
