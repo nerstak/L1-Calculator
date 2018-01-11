@@ -137,10 +137,10 @@ def evaluate(polynom,str_warn=0): #Main part of the program
             rightPart.append(polynom[i])
         resultPart = evaluate(insidePart) #Compute inside of parenthesis
         if resultPart[1] is not None: #If there is an error inside the parenthesis, stop everything and directly return the error
-            return (None,temp[1])
+            return (None,resultPart[1])
         else:
             listResult, Error = string_to_list_type(str(resultPart[0])) #Transforming the result ( which is a string) into a list
-            if temp[0][1] == 'variable': #If it is a variable, it means that it is a string that couln't have been recognised because they were no quotation marks
+            if listResult[0][1] == 'variable': #If it is a variable, it means that it is a string that couln't have been recognised because they were no quotation marks
                 ret = leftPart + [(listResult[0][0],'string')] + rightPart
             else:
                 ret = leftPart + listResult + rightPart
