@@ -88,9 +88,8 @@ def string_to_list_type(string): #Function to converts a string into a list of l
                     list.append(("=","setvariable"))
                     i+=1
             else:
-                continu = True
                 nb = ''
-                while i < len(string) and (string[i] not in [" ",'"','(',')','='] and type_calc(string[i]) != "operator") and continu == True: #Composing a string, until a forbidden caracter
+                while i < len(string) and (string[i] not in [" ",'"','(',')','='] and type_calc(string[i]) != "operator"): #Composing a string, until a forbidden caracter
                     nb = nb + string[i]
                     i+=1
                 if type_calc(nb) == 'string': #If its type is string, it means it is as variable
