@@ -9,12 +9,12 @@
 > ```
 
 Made by Karsten
-##Features
-###Minimum requirements:
+## Features
+### Minimum requirements:
 - [x] Integer Expresssions
 - [x] String Expresssions & Promoting to String Type
 - [x] Boolean Expresssions
 - [x] Variables
 - [x] Error Handling
-###Additional features:
+### Additional features:
 - [x] Additional Operators (subtraction in strings("hello"-"l"); inversion of string(#"hello"))
